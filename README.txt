@@ -1,8 +1,7 @@
 	1.A "Sort By" dropdown: 
 		Lets the user sort the search results by many different ways including
 		by lowest price, highest price, newest to oldest release date, oldest to newest release date, artist
-		name, and collection name. All these options are hardcoded. Since it's a dropdown, only one option can be selected at once (i.e. can't
-		sort by multiple critera). When the user makes a search, the search results are ordered the default 
+		name, and collection name. All these options are hardcoded. Since it's a dropdown, only one option can be selected at once 		   (i.e. can't sort by multiple critera). When the user makes a search, the search results are ordered the default 
 		way(i.e how it comes from the iTunes API).
 	
 	2.Additional tab for each search result that lists all songs in a collection:
