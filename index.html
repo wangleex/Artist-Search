@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!-- 493 WARNING
+     note that the following CDN links
+     will work only when you have internet access
+     It incldues
+     jQuery
+     bootstrap
+     and
+     angular.js
+     note that jQuery is added to enable bootstrap.
+     You should NOT use jQuery.
+   -->
+
+<html lang="en-US">
+<head>
+  <title> 493 Artist Search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="script.js"></script>
+  </title>
+</head>
+<style>
+
+h5{
+  padding-bottom: 5px;
+  padding-top: 3px;
+}
+
+.loadingGif {
+  height: 100px;
+  width: 100px;
+}
+
+.col-md-6 {
+  min-height: 250px;
+}
+
+.genre{
+  border:solid 2px;
+  border-radius: 3px;
+  margin:5px;
+  white-space: nowrap;
+  background-color:#ccc;
+  padding:2px;
+}
+
+.counter {
+  color:darkgrey;
+}
+
+</style>
+<body ng-app = "493Search">
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+       <h3>493 Artist Search</h3>
+    </div>
+  </div>
+</nav>
+<div class = "container" ng-controller="searchResultController as searchApp">
+  <div class = "row searchbar" >
+    <div class = "col-lg-12 col-md-12 col-sm-12">
+      <h4>Enter the name of the artist and enter : </h4>
+      <input type="text" ng-keyup="$event.keyCode == 13 && searchApp.search()" ng-model="searchApp.query"></form>
+    </div>
+  </div>
+  <div class ="row">
+    <div class = "col-lg-12 col-md-12 col-sm-12">
+      <h4>Search Result (Total {{searchApp.numberFound}} found.)</h4>
+        <div class="interaction" ng-hide="!searchApp.hasSearchedOnce">
+        <div class="btn-toolbar">
+            <button type="button" class="btn btn-success" ng-click="searchApp.resetFilter()">ALL</button>
+            <button ng-repeat="(genre,enabled) in searchApp.allGenres" type="button" ng-class="searchApp.allGenres[genre].selected ? 'btn btn-primary' : 'btn btn-default'" ng-click="searchApp.filter(genre)">{{genre}}</button>
+        </div>
+        <br>
+        <div class = "row">
+          <div class = "col-md-2">
+          <form>
+              <div class="form-group">
+                <label for="sortSelect">Sort By:</label>
+                <select class="form-control" id="sortSelect" ng-change="searchApp.selectedSort()" ng-model="searchApp.selectedSortFromMenu">
+                    <option selected></option>
+                    <option ng-repeat="(sort, enabled) in searchApp.availableSorts">{{sort}}</option>
+                </select>
+              </div>
+          </form>
+        </div>
+      </div>
+      <br>
+      <label>Refine By:</label>
+      <div class = "row" >
+        <div class = "col-md-4">
+            <p>Price</p>
+            <form>
+                <div class="checkbox" ng-repeat="(priceCheckbox, enabled) in searchApp.priceCheckboxes" >
+                <label>
+                  <input type="checkbox" ng-model="searchApp.priceCheckboxes[priceCheckbox].selected">{{priceCheckbox}}&nbsp;&nbsp;&nbsp;&nbsp;<span class="counter">({{searchApp.priceCheckboxes[priceCheckbox].counter}})</span>
+                </label>
+                </div>
+            </form>
+        </div>
+        <div class = "col-md-4">
+            <p>Explicitness</p>
+            <form>
+              <div ng-repeat="option in searchApp.explicitness" class="radio">
+                <label><input type="radio" name="optradio" ng-value="option" ng-model="searchApp.selectedExplicit" >{{ option }}</label>
+              </div>
+            </form>
+        </div>
+        <div class = "col-md-4">
+            <p>Artist Name</p>
+            <form>
+                <div class="checkbox" ng-repeat="(artist, enabled) in searchApp.artistNames" >
+                <label>
+                  <input type="checkbox" ng-model="searchApp.artistNames[artist].selected">{{artist}}&nbsp;&nbsp;&nbsp;&nbsp;<span class="counter">({{searchApp.artistNames[artist].counter}})</span>
+                </label>
+                </div>
+          </form>
+        </div>
+    </div>
+      <h4>List of results</h4>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6" ng-repeat="artist in searchApp.allArtists | 
+    filter: {primaryGenreName: searchApp.chosenGenre} | 
+    filter:searchApp.byExplicit | 
+    filter:searchApp.byPriceFilter |
+    filter:searchApp.byArtistFilter |
+    orderBy: searchApp.chosenSort">
+      <div class="col-md-5">
+        <img ng-src="{{artist.artworkUrl100}}" class="img-responsive" >
+      </div>
+      <div class="col-md-7">
+        <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" ng-href="{{'#Description-' + artist.index}}">Description</a></li>
+          <li><a data-toggle="tab" ng-href="{{'#ArtistInformation-' + artist.index}}" ng-click="searchApp.getArtistInfo(artist.artistName, artist.index)">Artist Infor.</a></li>
+          <li><a data-toggle="tab" ng-href="{{'#Songs-' + artist.index}}" ng-click="searchApp.collectionSongs(artist.collectionName, artist.index)">Songs</a></li>
+        </ul>
+        <div class="tab-content">
+          <div ng-attr-id="{{'Description-' + artist.index}}" class="tab-pane fade in active">
+            <p><b>Artist Name: </b>{{artist.artistName}}</p>
+            <p><b>Collection Name: </b>{{artist.collectionName}}</p>
+            <p><b>Price: </b>${{artist.collectionPrice}}</p>
+            <p><b>Type: </b>{{artist.kind}}</p>
+            <p><b>Preview: </b><a ng-href="{{artist.previewUrl}}">link</a></p>
+          </div>
+
+          <div ng-attr-id="{{'Songs-' + artist.index}}" class="tab-pane fade">
+              <p>Songs in collection "{{artist.collectionName}}" include:</p>
+              <ul class="list-unstyled">
+                <ul>
+                  <li ng-repeat="song in artist.collectionSongs">{{song}}</li>
+                </ul>
+              </ul>
+            </div>
+
+          <div ng-attr-id="{{'ArtistInformation-' + artist.index}}" class="tab-pane fade">
+            <div ng-show="artist.loading">
+              <img src="loading.gif" class="loadingGif">
+            </div>
+            <div ng-show="!artist.loading">
+                {{artist.artistDescription}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
