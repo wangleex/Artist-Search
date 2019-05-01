@@ -1,4 +1,4 @@
-var app = angular.module('493Search', []);
+var app = angular.module('Search', []);
 
 app.controller('searchResultController', ['$scope', '$http', function ($scope, $http) {
     let searchApp = this;
