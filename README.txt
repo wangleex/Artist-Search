@@ -1,5 +1,3 @@
-BONUS FEATURES
-
 	1.A "Sort By" dropdown: 
 		Lets the user sort the search results by many different ways including
 		by lowest price, highest price, newest to oldest release date, oldest to newest release date, artist
